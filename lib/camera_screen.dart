@@ -261,7 +261,7 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
               onPressed: () {
                 setState(() {
                   photoMainCategory.insert(
-                      photoMainCategory.length - 1, "diger");
+                      photoMainCategory.length - 1, "Camera");
                   selectedIndex = photoMainCategory.length - 1;
                 });
                 Navigator.of(context).pop();
