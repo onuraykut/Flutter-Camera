@@ -41,7 +41,7 @@ class _CameraPageState extends State<CameraPage>
     "Work",
     "Travel",
     "Private",
-    "Ekle",
+    "Add",
   ];
   Future<void> init() async {
     await getStorage();
@@ -79,7 +79,7 @@ class _CameraPageState extends State<CameraPage>
       String folder2 = prefs.getString("folder2") ?? "Work";
       String folder3 = prefs.getString("folder3") ?? "Travel";
       String folder4 = prefs.getString("folder4") ?? "Private";
-      String folder5 = prefs.getString("folder5") ?? "Ekle";
+      String folder5 = prefs.getString("folder5") ?? "Add";
 
       String folder6 = prefs.getString("folder6");
       String folder7 = prefs.getString("folder7");
@@ -179,6 +179,10 @@ class _CameraPageState extends State<CameraPage>
                         });
                         _changeFolderName(context);
                       },
+                onDoubleTap:(){
+                        
+                },
+
                       child: Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: CircleAvatar(
@@ -436,7 +440,7 @@ class _CameraPageState extends State<CameraPage>
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
-              child: new Text("Tamam"),
+              child: new Text("Ok"),
               onPressed: () {
                 int length = photoMainCategory.length - 1;
                 setState(() {

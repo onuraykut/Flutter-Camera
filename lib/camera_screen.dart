@@ -30,7 +30,7 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
     "Work",
     "Travel",
     "Private",
-    "Ekle",
+    "Add",
   ];
 
   @override
