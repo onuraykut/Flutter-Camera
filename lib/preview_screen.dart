@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreviewScreen extends StatefulWidget{
@@ -46,7 +47,8 @@ class _PreviewScreenState extends State<PreviewScreen>{
           children: <Widget>[
             Expanded(
               flex: 2,
-              child: Image.file(File(widget.imgPath),fit: BoxFit.cover,),
+              child: PhotoView(imageProvider: FileImage(File(widget.imgPath),),)
+              //Image.file(File(widget.imgPath),fit: BoxFit.contain,),
             ),
             Align(
               alignment: Alignment.bottomCenter,

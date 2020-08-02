@@ -1,9 +1,12 @@
 import 'package:camera/camera.dart';
+import 'package:directory_picker/directory_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:folder_picker/folder_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:permission/permission.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +22,7 @@ class _CameraPageState extends State<CameraPage>
 
   Animation animation;
   AnimationController animationController;
-  Duration myDuration = Duration(milliseconds: 200);
+  Duration myDuration = Duration(milliseconds: 500);
 
   CameraController controller;
   List cameras;
@@ -28,20 +31,20 @@ class _CameraPageState extends State<CameraPage>
   int selectedIndex = 0;
   bool isMenuOpen = true;
   TextEditingController klasorAdicontroller = new TextEditingController();
-  bool isCaptured=false;
+  Directory externalDirectory;
+
   SharedPreferences lastPicturePath ;
-  double width;
-  double height;
-  List<String> photoMainCategory = new List<String>();
-  List<String> photoMainCategoryDefault = [
+
+  List<String> photoMainCategory = [
     "Family",
     "Work",
     "Travel",
     "Private",
     "Ekle",
   ];
-
-
+  Future<void> init() async {
+    await getStorage();
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -51,7 +54,7 @@ class _CameraPageState extends State<CameraPage>
     animationController.addListener(() {
       setState(() {});
     });
-
+   init();
 
     animationController.forward();
 
@@ -69,27 +72,8 @@ class _CameraPageState extends State<CameraPage>
     }).catchError((err) {
       print('Error :${err.code}Error message : ${err.message}');
     });
+
     SharedPreferences.getInstance().then((prefs) {
-      String folder1 = prefs.getString("folder1") ?? "Family";
-      String folder2 = prefs.getString("folder2") ?? "Work";
-      String folder3 = prefs.getString("folder3") ?? "Travel";
-      String folder4 = prefs.getString("folder4") ?? "Private";
-      String folder5 = prefs.getString("folder5") ?? "Ekle";
-
-      String folder6 = prefs.getString("folder6");
-      String folder7 = prefs.getString("folder7");
-
-      photoMainCategory.add(folder1);
-      photoMainCategory.add(folder2);
-      photoMainCategory.add(folder3);
-      photoMainCategory.add(folder4);
-      photoMainCategory.add(folder5);
-      if(folder6!=null)
-      photoMainCategory.add(folder6);
-      if(folder7!=null)
-      photoMainCategory.add(folder7);
-
-
       setState(() => lastPicturePath = prefs);
     });
   }
@@ -106,14 +90,13 @@ class _CameraPageState extends State<CameraPage>
   @override
   Widget build(BuildContext context) {
 
-    height = MediaQuery.of(context).size.height;
-    width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Stack(
         children: <Widget>[
           Container(
-            
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -122,15 +105,14 @@ class _CameraPageState extends State<CameraPage>
                   child: _cameraPreviewWidget(),
                 ),
                 Align(
-                  alignment: Alignment.bottomCenter,
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 500),
-
+                  alignment: Alignment.bottomRight,
+                  child: Container(
                     height: height * 0.18,
                     width: double.infinity,
-                    color: isCaptured ? Colors.lightGreenAccent : Colors.black,
+                    padding: EdgeInsets.all(15),
+                    color: Colors.black,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         _cameraToggleRowWidget(),
                         _cameraControlWidget(context),
@@ -144,8 +126,9 @@ class _CameraPageState extends State<CameraPage>
             ),
           ),
           AnimatedPositioned(
-            left: isMenuOpen == true ? animationController.value : -155,
-            top: height/6,
+            left: isMenuOpen == true ? animationController.value : -55,
+            top: height/8,
+            bottom: height/5.6,
             right: 0,
             duration: myDuration,
             child: ListView.builder(
@@ -186,7 +169,7 @@ class _CameraPageState extends State<CameraPage>
                             decoration: BoxDecoration(
                                 image: DecorationImage(
                                     image: AssetImage(
-                                        "assets/images/${!photoMainCategoryDefault.contains(photoMainCategory[index]) ? "Camera" : photoMainCategory[index]}.png"))),
+                                        "assets/images/${photoMainCategory[index]}.png"))),
                           ),
                         ),
                       ),
@@ -199,6 +182,7 @@ class _CameraPageState extends State<CameraPage>
                     SizedBox(
                       height: 10,
                     ),
+
                   ],
                 );
               },
@@ -207,7 +191,7 @@ class _CameraPageState extends State<CameraPage>
           AnimatedPositioned(
             duration: myDuration,
             left: isMenuOpen == true ?  width*0.075 : -25,
-            top: height/2.5,
+            top: height/3,
             child: InkWell(
               onTap: () {
                 setState((){
@@ -279,25 +263,44 @@ class _CameraPageState extends State<CameraPage>
     CameraLensDirection lensDirection = selectedCamera.lensDirection;
 
     return Container(
-      width: width*0.33,
-      child: FlatButton.icon(
-        onPressed: _onSwitchCamera,
-        icon: Icon(
-          _getCameraLensIcon(lensDirection),
-          color: Colors.white,
-          size: 24,
-        ),
-        label: Text(
-          '${lensDirection.toString().substring(lensDirection.toString().indexOf('.') + 1).toUpperCase()}',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+      width: 100,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FlatButton.icon(
+          onPressed: _onSwitchCamera,
+          icon: Icon(
+            _getCameraLensIcon(lensDirection),
+            color: Colors.white,
+            size: 24,
+          ),
+          label: Text(
+            '${lensDirection.toString().substring(lensDirection.toString().indexOf('.') + 1).toUpperCase()}',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          ),
         ),
       ),
     );
   }
+  Future<void> getStorage() async {
+    final directory = await getExternalStorageDirectory();
+    setState(() => externalDirectory = directory);
+  }
 
+  Future<void> pick(BuildContext context) async{
+    Directory newDirectory = await DirectoryPicker.pick(
+        context: context,
+        rootDirectory: externalDirectory
+    );
+
+    if (newDirectory != null) {
+    } else {
+      // User cancelled without picking any directory
+    }
+  }
   Widget _cameraControlWidget(context) {
+
     return Container(
-      width: width*0.33,
+      width: 100,
       child: FloatingActionButton(
         child: Icon(
           Icons.camera,
@@ -305,27 +308,54 @@ class _CameraPageState extends State<CameraPage>
         ),
         backgroundColor: Colors.white,
         onPressed: () {
-          _onCapturePressed(context);
+          _onCapturePressed();
+
+          /*  Navigator.of(context).push<FolderPickerPage>(
+              MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return FolderPickerPage(
+                        rootDirectory: externalDirectory, /// a [Directory] object
+                        action: (BuildContext context, Directory folder) async {
+                          print("Picked folder $folder");
+                        });
+                  }));
+ */
+        //  _onCapturePressed(context);
         },
       ),
     );
   }
-
+  Future<void> getPermissions() async {
+    final permissions =
+    await Permission.getPermissionsStatus([PermissionName.Storage]);
+    var request = true;
+    switch (permissions[0].permissionStatus) {
+      case PermissionStatus.allow:
+        request = false;
+        break;
+      case PermissionStatus.always:
+        request = false;
+        break;
+      default:
+    }
+    if (request) {
+      await Permission.requestPermissions([PermissionName.Storage]);
+    }
+  }
   _getPreviewPicture(context) {
 
     String path;
     String path2;
 
-    path2 = "assets/images/blackpicture.png";
+    path2 = "assets/images/diger.png";
     if(lastPicturePath !=null){
       path = lastPicturePath.getString('path');
     }
 
     return Container(
-      width: width*0.33,
+      width: 100,
       child: InkWell(
         onTap: (){
-          if(path!=null)
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -358,21 +388,13 @@ class _CameraPageState extends State<CameraPage>
     _initCameraController(selectedCamera);
   }
 
-  void _onCapturePressed(context) async {
+  void _onCapturePressed() async {
     try {
       callFileMethod(photoMainCategory[selectedIndex]);
       final path =
-          join((await getExternalStorageDirectory()).path+"/"+photoMainCategory[selectedIndex], '${DateTime.now()}.png');
+          join("/storage/emulated/0/DCIM/"+photoMainCategory[selectedIndex]+"/", '${DateTime.now()}.png');
       await controller.takePicture(path);
       debugPrint(getTemporaryDirectory().toString());
-      Future.delayed(const Duration(milliseconds: 500), () {
-        setState(() {
-          isCaptured = false;
-        });
-      });
-      setState(() {
-        isCaptured = true;
-      });
       SharedPreferences lastPicturePath = await SharedPreferences.getInstance();
       await lastPicturePath.setString('path', path);
     } catch (e) {
@@ -400,12 +422,9 @@ class _CameraPageState extends State<CameraPage>
             new FlatButton(
               child: new Text("Tamam"),
               onPressed: () {
-                int length = photoMainCategory.length - 1;
                 setState(() {
                   photoMainCategory.insert(
-                      length, klasorAdicontroller.text);
-                  debugPrint("folder"+(length+1).toString());
-                  lastPicturePath.setString("folder"+(length+1+1).toString(), klasorAdicontroller.text);
+                      photoMainCategory.length - 1, klasorAdicontroller.text);
                 });
                 Navigator.of(context).pop();
                 //Navigator.of(context).popUntil((route) => route.isFirst);
@@ -440,7 +459,6 @@ class _CameraPageState extends State<CameraPage>
                 setState(() {
                   photoMainCategory[selectedIndex] = klasorAdicontroller.text;
                 });
-                lastPicturePath.setString("folder"+(selectedIndex+1).toString(), klasorAdicontroller.text);
                 Navigator.of(context).pop();
               },
             ),
@@ -472,7 +490,7 @@ class _CameraPageState extends State<CameraPage>
 class AppUtil {
   static Future<String> createFolderInAppDocDir(String folderName) async {
     //Get this App Document Directory
-    final Directory _appDocDir = await getExternalStorageDirectory();
+    final Directory _appDocDir = Directory("/storage/emulated/0/DCIM");
     //App Document Directory + folder name
     final Directory _appDocDirFolder =
         Directory('${_appDocDir.path}/$folderName/');

@@ -23,6 +23,7 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
   Tween<double> _translateValues = Tween<double>(begin: -55, end: 5);
 
   int selectedIndex = 0;
+  bool isCaptured = false;
 
   List<String> photoMainCategory = [
     "Family",
@@ -118,11 +119,12 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
                   ),
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 250),
                       height: height * 0.18,
                       width: double.infinity,
                       padding: EdgeInsets.all(15),
-                      color: Colors.black,
+                      color: isCaptured ? Colors.greenAccent : Colors.black,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -261,7 +263,7 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
               onPressed: () {
                 setState(() {
                   photoMainCategory.insert(
-                      photoMainCategory.length - 1, "Camera");
+                      photoMainCategory.length - 1, "diger");
                   selectedIndex = photoMainCategory.length - 1;
                 });
                 Navigator.of(context).pop();
@@ -366,6 +368,10 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
     } catch (e) {
       _showCameraException(e);
     }
+    setState(() {
+
+
+    });
   }
 
   void _onSwitchCamera() {
