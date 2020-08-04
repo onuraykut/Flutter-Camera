@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'preview_screen.dart';
 
+enum MenuEnum { changeName, delete }
+
 class CameraPage extends StatefulWidget {
   @override
   _CameraPageState createState() => _CameraPageState();
@@ -174,14 +176,12 @@ class _CameraPageState extends State<CameraPage>
                         debugPrint(index.toString());
                       },
                       onLongPress: (){
-                        setState(() {
+                        popUp(context);
+                       /* setState(() {
                           selectedIndex = index;
-                        });
-                        _changeFolderName(context);
+                        });*/
+
                       },
-                onDoubleTap:(){
-                        
-                },
 
                       child: Padding(
                         padding: const EdgeInsets.all(4.0),
@@ -236,7 +236,56 @@ class _CameraPageState extends State<CameraPage>
       ),
     );
   }
+  Widget popUp(BuildContext context) {
+  showMenu(context: context,position: RelativeRect.fromLTRB(width/3, height/3, width/2, height/2), items: <PopupMenuEntry>[
+    PopupMenuItem<MenuEnum>(
+      value: MenuEnum.changeName,
+      child: InkWell(
+        onTap:() {
+          debugPrint("oldu amk");
+        },
+        child: Text("Change Name",
+            style: TextStyle(
+              fontSize: 15,
+            )),
+      ),
+    ),
+    const PopupMenuItem<MenuEnum>(
+      value: MenuEnum.delete,
+      child: Text(
+        "Delete",
+        style: TextStyle(fontSize: 15),
+      ),
+    ),
+    ],);
 
+
+    /*
+    * const PopupMenuItem<MenuEnum>(
+          value: MenuEnum.changeName,
+          child: Text("Change Name",
+              style: TextStyle(
+                fontSize: 15,
+              )),
+        ),
+        const PopupMenuItem<MenuEnum>(
+          value: MenuEnum.delete,
+          child: Text(
+            "Delete",
+            style: TextStyle(fontSize: 15),
+          ),
+        ),*/
+  }
+
+  void deleteCustomFolder() async{
+    if(selectedIndex>3 && photoMainCategory.length-1!=selectedIndex){
+      setState(() {
+        photoMainCategory.removeAt(selectedIndex);
+      });
+      SharedPreferences folderName = await SharedPreferences.getInstance();
+      await folderName.setString('folder'+(selectedIndex+1).toString(), null);
+    }
+  }
   Future _initCameraController(CameraDescription cameraDescription) async {
     if (controller != null) {
       await controller.dispose();
