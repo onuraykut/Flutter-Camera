@@ -1,4 +1,4 @@
-package com.kryptow.flutter_camera
+package com.avlteam.camera
 
 import io.flutter.embedding.android.FlutterActivity
 

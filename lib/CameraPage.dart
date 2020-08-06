@@ -1,7 +1,9 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:directory_picker/directory_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission/permission.dart';
@@ -152,7 +154,7 @@ class _CameraPageState extends State<CameraPage>
           ),
           AnimatedPositioned(
             left: isMenuOpen == true ? animationController.value : -155,
-            top: height/6,
+            top:  height * 0.1,
             right: 0,
             duration: myDuration,
             child: ListView.builder(
@@ -176,10 +178,31 @@ class _CameraPageState extends State<CameraPage>
                         debugPrint(index.toString());
                       },
                       onLongPress: (){
-                        popUp(context);
-                       /* setState(() {
+                        setState(() {
                           selectedIndex = index;
-                        });*/
+                        });
+                        AwesomeDialog(
+                            context: context,
+                            animType: AnimType.SCALE,
+                            headerAnimationLoop: true,
+                            dialogType: DialogType.INFO,
+                            title: 'Yapmak istediğiniz işlemi seçiniz',
+                            desc: "",
+                            btnOkOnPress: () {
+                              _changeFolderName(context);
+                            },
+                            btnCancelOnPress: () {},
+                            btnOkIcon: Icons.folder_open,
+                            btnOkColor: Colors.teal,
+                            btnOkText: "Klasör adı değiştir",
+                            btnCancelIcon: Icons.delete,
+                            btnCancelText: "Klasörü sil",
+                            btnCancelColor: Colors.green,
+                            onDissmissCallback: () {
+                              deleteCustomFolder();
+                            })..show();
+//                        popUp(context);
+
 
                       },
 
@@ -215,8 +238,8 @@ class _CameraPageState extends State<CameraPage>
           ),
           AnimatedPositioned(
             duration: myDuration,
-            left: isMenuOpen == true ?  width*0.075 : -25,
-            top: height/2.5,
+            left: isMenuOpen == true ?  width*0.13 : 0,
+            top: height/2,
             child: InkWell(
               onTap: () {
                 setState((){
@@ -225,11 +248,7 @@ class _CameraPageState extends State<CameraPage>
                   isMenuOpen = !isMenuOpen;
                 });
               },
-              child: Container(
-                height: 75,
-                width: 75,
-                child: Icon(Icons.arrow_forward_ios,color: Colors.white,),
-              ),
+              child: Icon(Icons.arrow_forward_ios,color: Colors.white,),
             ),
           ),
         ],
@@ -379,6 +398,7 @@ class _CameraPageState extends State<CameraPage>
         backgroundColor: Colors.white,
         onPressed: () {
 //          pick(context);
+          getPermissions();
           _onCapturePressed();
         },
       ),
@@ -466,6 +486,8 @@ class _CameraPageState extends State<CameraPage>
       });
       SharedPreferences lastPicturePath = await SharedPreferences.getInstance();
       await lastPicturePath.setString('path', path);
+
+      ImageGallerySaver.saveFile(path);
     } catch (e) {
       _showCameraException(e);
     }
@@ -526,7 +548,7 @@ class _CameraPageState extends State<CameraPage>
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
-              child: new Text("Tamam"),
+              child: new Text("Okey"),
               onPressed: () {
                 setState(() {
                   photoMainCategory[selectedIndex] = klasorAdicontroller.text;

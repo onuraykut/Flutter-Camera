@@ -259,7 +259,7 @@ class _CameraScreenState extends State with SingleTickerProviderStateMixin {
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
-              child: new Text("Tamam"),
+              child: new Text("Okey"),
               onPressed: () {
                 setState(() {
                   photoMainCategory.insert(
