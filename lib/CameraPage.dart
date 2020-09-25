@@ -186,7 +186,7 @@ class _CameraPageState extends State<CameraPage>
                             animType: AnimType.SCALE,
                             headerAnimationLoop: true,
                             dialogType: DialogType.INFO,
-                            title: 'Yapmak istediğiniz işlemi seçiniz',
+                            title: 'What do you want to do?',
                             desc: "",
                             btnOkOnPress: () {
                               _changeFolderName(context);
@@ -194,9 +194,9 @@ class _CameraPageState extends State<CameraPage>
                             btnCancelOnPress: () {},
                             btnOkIcon: Icons.folder_open,
                             btnOkColor: Colors.teal,
-                            btnOkText: "Klasör adı değiştir",
+                            btnOkText: "Change folder name",
                             btnCancelIcon: Icons.delete,
-                            btnCancelText: "Klasörü sil",
+                            btnCancelText: "Delete folder",
                             btnCancelColor: Colors.green,
                             onDissmissCallback: () {
                               deleteCustomFolder();
@@ -399,7 +399,7 @@ class _CameraPageState extends State<CameraPage>
         onPressed: () {
 //          pick(context);
           getPermissions();
-          _onCapturePressed();
+//          _onCapturePressed();
         },
       ),
     );
@@ -408,7 +408,7 @@ class _CameraPageState extends State<CameraPage>
     final permissions =
     await Permission.getPermissionsStatus([PermissionName.Storage]);
     var request = true;
-    switch (permissions[0].permissionStatus) {
+    switch (permissions[0].permissionStatus ) {
       case PermissionStatus.allow:
         request = false;
         break;
@@ -419,6 +419,7 @@ class _CameraPageState extends State<CameraPage>
     }
     if (request) {
       await Permission.requestPermissions([PermissionName.Storage]);
+      _onCapturePressed();
     }
   }
   _getPreviewPicture(context) {
